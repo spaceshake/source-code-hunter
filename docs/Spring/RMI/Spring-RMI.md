@@ -1,18 +1,25 @@
 # Spring RMI
+
 - Author: [HuiFer](https://github.com/huifer)
 - 源码阅读仓库: [SourceHot-Spring](https://github.com/SourceHot/spring-framework-read)
 - Spring 远程服务调用
+
 ## DEMO
+
 ### 服务提供方
+
 - 服务提供方需要准备**接口**、**接口实现泪**
 - 接口
+
 ```java
 public interface IDemoRmiService {
     int add(int a, int b);
 }
 
 ```
+
 - 接口实现
+
 ```java
 public class IDemoRmiServiceImpl implements IDemoRmiService {
     @Override
@@ -21,7 +28,9 @@ public class IDemoRmiServiceImpl implements IDemoRmiService {
     }
 }
 ```
-- xml配置文件
+
+- xml 配置文件
+
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -41,7 +50,9 @@ public class IDemoRmiServiceImpl implements IDemoRmiService {
     </bean>
 </beans>
 ```
+
 - 运行
+
 ```java
 public class RMIServerSourceCode {
     public static void main(String[] args) throws Exception {
@@ -50,8 +61,11 @@ public class RMIServerSourceCode {
 }
 
 ```
+
 ### 服务调用方
+
 - xml 配置
+
 ```java
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
@@ -66,8 +80,10 @@ public class RMIServerSourceCode {
 
 </beans>
 ```
-**注意:rmi使用小写**
+
+**注意:rmi 使用小写**
 大写报错信息:
+
 ```text
 Exception in thread "main" org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'rmiClient' defined in class path resource [rmi/RMIClientSourceCode.xml]: Invocation of init method failed; nested exception is org.springframework.remoting.RemoteLookupFailureException: Service URL [RMI://localhost:9999/springRmi] is invalid; nested exception is java.net.MalformedURLException: invalid URL scheme: RMI://localhost:9999/springRmi
 	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1795)
@@ -99,7 +115,9 @@ Caused by: java.net.MalformedURLException: invalid URL scheme: RMI://localhost:9
 	... 17 more
 
 ```
+
 - 运行
+
 ```java
 public class RMIClientSourceCode {
     public static void main(String[] args) {
@@ -112,10 +130,15 @@ public class RMIClientSourceCode {
 ```
 
 ---
+
 ## 服务端初始化
-- `org.springframework.remoting.rmi.RmiServiceExporter`,该类定义了spring的远程服务信息
+
+- `org.springframework.remoting.rmi.RmiServiceExporter`,该类定义了 spring 的远程服务信息
+
 ### RmiServiceExporter
+
 - 基础属性如下
+
 ```java
  public class RmiServiceExporter extends RmiBasedExporter implements InitializingBean, DisposableBean {
 /**
@@ -173,9 +196,10 @@ public class RMIClientSourceCode {
     private boolean createdRegistry = false;
 }
 ```
+
 - 属性设置不说了,看接口实现了那些
-    1. InitializingBean: 初始化bean调用`afterPropertiesSet`方法
-    2. DisposableBean: 摧毁bean调用`destroy`方法
+  1. InitializingBean: 初始化 bean 调用`afterPropertiesSet`方法
+  2. DisposableBean: 摧毁 bean 调用`destroy`方法
 
 ```java
 
@@ -268,7 +292,9 @@ public class RMIClientSourceCode {
 ```
 
 #### checkService
-- 校验service 是否为空
+
+- 校验 service 是否为空
+
 ```java
     /**
      * Check whether the service reference has been set.
@@ -282,8 +308,10 @@ public class RMIClientSourceCode {
 ```
 
 #### getRegistry
+
 - 获取 Registry 实例
-    - 简单说就是通过host和port创建socket
+  - 简单说就是通过 host 和 port 创建 socket
+
 ```java
     protected Registry getRegistry(String registryHost, int registryPort,
                                    @Nullable RMIClientSocketFactory clientSocketFactory, @Nullable RMIServerSocketFactory serverSocketFactory)
@@ -305,8 +333,11 @@ public class RMIClientSourceCode {
         }
     }
 ```
+
 #### getObjectToExport
-- 初始化并且获取缓存的object
+
+- 初始化并且获取缓存的 object
+
 ```java
     protected Remote getObjectToExport() {
         // determine remote object
@@ -331,8 +362,11 @@ public class RMIClientSourceCode {
     }
 
 ```
+
 #### getProxyForService
+
 - 获取代理服务
+
 ```java
     protected Object getProxyForService() {
         //  service 校验
@@ -365,13 +399,15 @@ public class RMIClientSourceCode {
     }
 
 ```
+
 - 这里要注意,切片方法的`invoke`调用
 - `RmiInvocationWrapper`的`invoke`方法会在调用方调用接口时候触发
 
+#### rebind 和 bind
 
-#### rebind 和 bind 
 - 绑定和重新绑定
 - 这部分源码在: `sun.rmi.registry.RegistryImpl`
+
 ```java
     public void rebind(String var1, Remote var2) throws RemoteException, AccessException {
         checkAccess("Registry.rebind");
@@ -380,6 +416,7 @@ public class RMIClientSourceCode {
 
 
 ```
+
 ```java
     public void bind(String var1, Remote var2) throws RemoteException, AlreadyBoundException, AccessException {
         checkAccess("Registry.bind");
@@ -393,10 +430,13 @@ public class RMIClientSourceCode {
         }
     }
 ```
-- 共同维护`    private Hashtable<String, Remote> bindings = new Hashtable(101);`这个对象
+
+- 共同维护` private Hashtable<String, Remote> bindings = new Hashtable(101);`这个对象
 
 #### unexportObjectSilently
+
 - 出现异常时候调用方法
+
 ```java
 
     private void unexportObjectSilently() {
@@ -411,14 +451,14 @@ public class RMIClientSourceCode {
     }
 
 ```
+
 ---
+
 ## 客户端初始化
 
 ### RmiProxyFactoryBean
 
 ![image-20200225104850528](../../../images/spring/image-20200226082614312.png)
-
-
 
 - 该类实现了`InitializingBean`接口直接看`afterPropertiesSet`方法
 
@@ -453,17 +493,12 @@ public class RMIClientSourceCode {
                     throw new IllegalArgumentException("Property 'serviceUrl' is required");
                 }
             }
-        
+
         ```
-
-
-
 
 ### org.springframework.remoting.support.UrlBasedRemoteAccessor#afterPropertiesSet
 
 - 该方法对 `serviceUrl`进行空判断，如果是空的抛出异常
-
-
 
 ```java
     /**
@@ -477,11 +512,7 @@ public class RMIClientSourceCode {
     }
 ```
 
-
-
 ### org.springframework.remoting.rmi.RmiClientInterceptor#afterPropertiesSet
-
-
 
 ```java
     @Override
@@ -494,9 +525,7 @@ public class RMIClientSourceCode {
 1. 调用父类的`afterPropertiesSet`方法判断`serviceUrl`是否为空
 2. 执行`prepare()`方法
 
-
-
-```JAVA
+```java
     public void prepare() throws RemoteLookupFailureException {
         // Cache RMI stub on initialization?
         if (this.lookupStubOnStartup) {
@@ -524,7 +553,7 @@ public class RMIClientSourceCode {
 
 #### org.springframework.remoting.rmi.RmiClientInterceptor#lookupStub
 
-```JAVA
+```java
 protected Remote lookupStub() throws RemoteLookupFailureException {
         try {
             Remote stub = null;
@@ -576,8 +605,6 @@ protected Remote lookupStub() throws RemoteLookupFailureException {
     }
 ```
 
-
-
 ### org.springframework.remoting.rmi.RmiProxyFactoryBean#afterPropertiesSet
 
 ```java
@@ -594,14 +621,11 @@ protected Remote lookupStub() throws RemoteLookupFailureException {
 
 ```
 
-
-
-
 ### 增强调用
 
 - 通过类图我们可以知道`RmiProxyFactoryBean`实现了`MethodInterceptor`,具体实现方法在`org.springframework.remoting.rmi.RmiClientInterceptor#invoke`
 
-```JAVA
+```java
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
         // 获取remote
@@ -625,11 +649,7 @@ protected Remote lookupStub() throws RemoteLookupFailureException {
 
 ```
 
-
-
-
-
-```JAVA
+```java
     protected Remote getStub() throws RemoteLookupFailureException {
         if (!this.cacheStub || (this.lookupStubOnStartup && !this.refreshStubOnConnectFailure)) {
             // 如果缓存stub存在直接获取,否则创建
@@ -646,13 +666,9 @@ protected Remote lookupStub() throws RemoteLookupFailureException {
     }
 ```
 
-
-
 - `org.springframework.remoting.rmi.RmiClientInterceptor#doInvoke(org.aopalliance.intercept.MethodInvocation, org.springframework.remoting.rmi.RmiInvocationHandler)`
 
-  
-
-```JAVA
+```java
     @Nullable
     protected Object doInvoke(MethodInvocation methodInvocation, RmiInvocationHandler invocationHandler)
             throws RemoteException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
@@ -673,13 +689,11 @@ protected Remote lookupStub() throws RemoteLookupFailureException {
 
 ![image-20200226082614312](../../../images/spring/image-20200226082614312.png)
 
-
-
 最后的`invoke`方法
 
 - `org.springframework.remoting.rmi.RmiInvocationWrapper#invoke`
 
-  ```JAVA
+  ```java
       /**
        * Delegates the actual invocation handling to the RMI exporter.
        *
@@ -691,28 +705,28 @@ protected Remote lookupStub() throws RemoteLookupFailureException {
       @Nullable
       public Object invoke(RemoteInvocation invocation)
               throws RemoteException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-  
+
           return this.rmiExporter.invoke(invocation, this.wrappedObject);
       }
   ```
 
   - 继续跟踪`org.springframework.remoting.rmi.RmiBasedExporter#invoke`
 
-    ```JAVA
+    ```java
         @Override
         protected Object invoke(RemoteInvocation invocation, Object targetObject)
                 throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-    
+
             return super.invoke(invocation, targetObject);
         }
     ```
 
     - 继续跟踪`org.springframework.remoting.support.RemoteInvocationBasedExporter#invoke`
 
-      ```JAVA
+      ```java
           protected Object invoke(RemoteInvocation invocation, Object targetObject)
                   throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-      
+
               if (logger.isTraceEnabled()) {
                   logger.trace("Executing " + invocation);
               }
@@ -738,10 +752,8 @@ protected Remote lookupStub() throws RemoteLookupFailureException {
                   throw ex;
               }
           }
-      
-      ```
 
-      
+      ```
 
 - 关键语句**`return getRemoteInvocationExecutor().invoke(invocation, targetObject);`**
 
@@ -749,9 +761,7 @@ protected Remote lookupStub() throws RemoteLookupFailureException {
 
 ![image-20200226083247784](../../../images/spring/image-20200226083247784.png)
 
-
-
-```JAVA
+```java
 public class DefaultRemoteInvocationExecutor implements RemoteInvocationExecutor {
 
     @Override
@@ -766,7 +776,7 @@ public class DefaultRemoteInvocationExecutor implements RemoteInvocationExecutor
 }
 ```
 
-```JAVA
+```java
     public Object invoke(Object targetObject)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 
@@ -777,21 +787,15 @@ public class DefaultRemoteInvocationExecutor implements RemoteInvocationExecutor
 
 - 这部分流程相对清晰,从对象中获取函数,调用这个函数
 
-
-
 ---
 
-
-
-## 服务端debug
+## 服务端 debug
 
 - `org.springframework.remoting.rmi.RmiServiceExporter#afterPropertiesSet`打上断点
 
 ![image-20200226084056993](../../../images/spring/image-20200226084056993.png)
 
-可以看到此时的数据字段和我们的xml配置中一致
-
-
+可以看到此时的数据字段和我们的 xml 配置中一致
 
 - `org.springframework.remoting.rmi.RmiServiceExporter#prepare`断点
 
@@ -801,7 +805,7 @@ public class DefaultRemoteInvocationExecutor implements RemoteInvocationExecutor
 
   ![image-20200226084400939](../../../images/spring/image-20200226084400939.png)
 
-  ​	这一行是jdk的就不进去看了
+  ​ 这一行是 jdk 的就不进去看了
 
   执行完成就创建出了 `Registry`
 
@@ -813,9 +817,7 @@ public class DefaultRemoteInvocationExecutor implements RemoteInvocationExecutor
 
   ![image-20200226084640683](../../../images/spring/image-20200226084640683.png)
 
-
-
-- 执行bind
+- 执行 bind
 
   ![image-20200226084923783](../../../images/spring/image-20200226084923783.png)
 
@@ -823,13 +825,11 @@ public class DefaultRemoteInvocationExecutor implements RemoteInvocationExecutor
 
 - 此时服务端信息已经成功记录并且启动
 
-## 客户端debug
+## 客户端 debug
 
 ![image-20200226085433130](../../../images/spring/image-20200226085433130.png)
 
 ![image-20200226085440865](../../../images/spring/image-20200226085440865.png)
-
-
 
 remote 对象
 
@@ -839,26 +839,18 @@ remote 对象
 
 ![image-20200226085839496](../../../images/spring/image-20200226085839496.png)
 
-
-
 - serviceProxy
 
   ![image-20200226090042946](../../../images/spring/image-20200226090042946.png)
 
-
-
 - 方法调用
-  - 使用的是AOP技术进行的，AOP相关技术不在此处展开
+  - 使用的是 AOP 技术进行的，AOP 相关技术不在此处展开
 
 ![image-20200226090315865](../../../images/spring/image-20200226090315865.png)
 
 stub 对象
 
 ![image-20200226090432052](../../../images/spring/image-20200226090432052.png)
-
-
-
-
 
 ![image-20200226090650154](../../../images/spring/image-20200226090650154.png)
 
@@ -870,10 +862,8 @@ stub 对象
 
   ![image-20200226090827849](../../../images/spring/image-20200226090827849.png)
 
-
-
 - 反射执行`method`结束整个调用
 
   ![image-20200226090945418](../../../images/spring/image-20200226090945418.png)
 
-  此时得到结果RMI调用结束
+  此时得到结果 RMI 调用结束

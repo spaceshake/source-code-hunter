@@ -1,9 +1,10 @@
 # Spring Boot 自动装配
+
 - Author: [HuiFer](https://github.com/huifer)
 - 源码阅读仓库: [SourceHot-spring-boot](https://github.com/SourceHot/spring-boot-read)
 
-
 - `org.springframework.boot.autoconfigure.SpringBootApplication`
+
 ```java
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
@@ -44,7 +45,7 @@ public @interface SpringBootApplication {
 @AutoConfigurationPackage
 @Import(AutoConfigurationImportSelector.class)
 public @interface EnableAutoConfiguration {
-    
+
 }
 ```
 
@@ -52,11 +53,11 @@ public @interface EnableAutoConfiguration {
 
 - 类图
 
-![image-20200320150642022](../../../images/SpringBoot/image-20200320150642022.png)
+![image-20200320150642022](../../images/SpringBoot/image-20200320150642022.png)
 
 ## getAutoConfigurationMetadata()
 
-```JAVA
+```java
 		@Override
 		public void process(AnnotationMetadata annotationMetadata, DeferredImportSelector deferredImportSelector) {
 			Assert.state(deferredImportSelector instanceof AutoConfigurationImportSelector,
@@ -86,10 +87,10 @@ public @interface EnableAutoConfiguration {
 
 - `org.springframework.boot.autoconfigure.AutoConfigurationMetadataLoader#loadMetadata(java.lang.ClassLoader)`
 
-  ```JAVA
+  ```java
   	static AutoConfigurationMetadata loadMetadata(ClassLoader classLoader, String path) {
   		try {
-  
+
   		    // 获取资源路径
   			Enumeration<URL> urls = (classLoader != null) ? classLoader.getResources(path)
   					: ClassLoader.getSystemResources(path);
@@ -103,20 +104,16 @@ public @interface EnableAutoConfiguration {
   			throw new IllegalArgumentException("Unable to load @ConditionalOnClass location [" + path + "]", ex);
   		}
   	}
-  
+
   ```
 
-  ![image-20200320160423991](../../../images/SpringBoot/image-20200320160423991.png)
-
-
+  ![image-20200320160423991](../../images/SpringBoot/image-20200320160423991.png)
 
 - `protected static final String PATH = "META-INF/spring-autoconfigure-metadata.properties";`
 
   注意： 这个文件在**target**编译后的文件夹中
 
   相关 Issues : https://github.com/spring-projects/spring-boot/issues/11282
-
-
 
 - 自动装配
 
@@ -134,43 +131,31 @@ public @interface EnableAutoConfiguration {
   org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration,\
   ```
 
-  
+![image-20200320162835665](../../images/SpringBoot/image-20200320162835665.png)
 
+同样找一下 redis
 
-
-![image-20200320162835665](../../../images/SpringBoot/image-20200320162835665.png)
-
-同样找一下redis
-
-![image-20200320163001728](../../../images/SpringBoot/image-20200320163001728.png)
-
-
-
-
+![image-20200320163001728](../../images/SpringBoot/image-20200320163001728.png)
 
 - 仔细看`org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration`类
 
-
-
 先说注解
 
-```JAVA
+```java
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(RedisOperations.class)
 @EnableConfigurationProperties(RedisProperties.class)
 @Import({ LettuceConnectionConfiguration.class, JedisConnectionConfiguration.class })
 ```
 
-
-
 ### EnableConfigurationProperties
 
 `自动映射一个POJO到Spring Boot配置文件（默认是application.properties文件）的属性集。`
 
 - `org.springframework.boot.autoconfigure.data.redis.RedisProperties`
-- 部分redis配置属性
+- 部分 redis 配置属性
 
-```JAVA
+```java
 @ConfigurationProperties(prefix = "spring.redis")
 public class RedisProperties {
 
@@ -215,20 +200,12 @@ public class RedisProperties {
 	 */
 	private String clientName;
 
-	
+
 
 }
 ```
 
-
-
 - 找到一个我们用相同方式去寻找到别的一些属性处理如`org.springframework.boot.autoconfigure.jdbc.JdbcProperties` 具体展开请各位读者自行了解了
-
-
-
-
-
-
 
 ### AnnotationMetadata
 
@@ -236,26 +213,22 @@ public class RedisProperties {
 
 - `org.springframework.boot.autoconfigure.AutoConfigurationImportSelector.AutoConfigurationGroup#process`
 
-  ![image-20200320163806852](../../../images/SpringBoot/image-20200320163806852.png)
+  ![image-20200320163806852](../../images/SpringBoot/image-20200320163806852.png)
 
 再此之前我们看过了`getAutoConfigurationMetadata()`的相关操作
 
-关注 	`AnnotationMetadata annotationMetadata` 存储了一些什么
+关注 `AnnotationMetadata annotationMetadata` 存储了一些什么
 
-![image-20200320164145286](../../../images/SpringBoot/image-20200320164145286.png)
+![image-20200320164145286](../../images/SpringBoot/image-20200320164145286.png)
 
 这里简单理解
 
-1.  mergedAnnotations 类相关的注解信息	
+1.  mergedAnnotations 类相关的注解信息
 2.  annotationTypes 在启动类上的注解列表
-
-
-
-
 
 ### getAutoConfigurationEntry
 
-```JAVA
+```java
 	protected AutoConfigurationEntry getAutoConfigurationEntry(AutoConfigurationMetadata autoConfigurationMetadata,
 			AnnotationMetadata annotationMetadata) {
 		if (!isEnabled(annotationMetadata)) {
@@ -283,10 +256,6 @@ public class RedisProperties {
 
 ```
 
-
-
-
-
 ### getAttributes
 
 ```java
@@ -302,11 +271,7 @@ public class RedisProperties {
 
 ```
 
-
-
-![image-20200320171138431](../../../images/SpringBoot/image-20200320171138431.png)
-
-
+![image-20200320171138431](../../images/SpringBoot/image-20200320171138431.png)
 
 ### getCandidateConfigurations
 
@@ -324,7 +289,7 @@ public class RedisProperties {
 
 ```
 
-![image-20200320171734270](../../../images/SpringBoot/image-20200320171734270.png)
+![image-20200320171734270](../../images/SpringBoot/image-20200320171734270.png)
 
 - 第一个是我自己写的一个测试用
 
@@ -333,30 +298,20 @@ public class RedisProperties {
     org.sourcehot.service.HelloServiceAutoConfiguration
   ```
 
-  
-
-
-
-
-
 ### removeDuplicates
 
 - new 两个对象直接做数据转换，去重
 
-```JAVA
+```java
 	protected final <T> List<T> removeDuplicates(List<T> list) {
 		return new ArrayList<>(new LinkedHashSet<>(list));
 	}
 
 ```
 
+### getExclusions
 
-
-
-
-### getExclusions	
-
-```JAVA
+```java
 	protected Set<String> getExclusions(AnnotationMetadata metadata, AnnotationAttributes attributes) {
 		Set<String> excluded = new LinkedHashSet<>();
 		// 获取属性 exclude 值转换成list
@@ -370,11 +325,9 @@ public class RedisProperties {
 
 ```
 
-
-
 ### getExcludeAutoConfigurationsProperty
 
-```JAVA
+```java
 	private List<String> getExcludeAutoConfigurationsProperty() {
 		if (getEnvironment() instanceof ConfigurableEnvironment) {
 			Binder binder = Binder.get(getEnvironment());
@@ -388,26 +341,20 @@ public class RedisProperties {
 
 ```
 
-
-
-![image-20200323080611527](../../../images/SpringBoot/image-20200323080611527.png)
-
-
+![image-20200323080611527](../../images/SpringBoot/image-20200323080611527.png)
 
 - 修改启动类
 
-  ```JAVA
+  ```java
   @SpringBootApplication(excludeName =  { "org.sourcehot.service.HelloServiceAutoConfiguration" })
-  
+
   ```
 
-  ![image-20200323081009823](../../../images/SpringBoot/image-20200323081009823.png)
+  ![image-20200323081009823](../../images/SpringBoot/image-20200323081009823.png)
 
 ### checkExcludedClasses
 
-
-
-```JAVA
+```java
 	private void checkExcludedClasses(List<String> configurations, Set<String> exclusions) {
 		List<String> invalidExcludes = new ArrayList<>(exclusions.size());
 		for (String exclusion : exclusions) {
@@ -424,15 +371,13 @@ public class RedisProperties {
 
 ```
 
-
-
 - `configurations.removeAll(exclusions)`
 
   移除忽略的类
 
 ### filter
 
-```JAVA
+```java
 	private List<String> filter(List<String> configurations, AutoConfigurationMetadata autoConfigurationMetadata) {
 		long startTime = System.nanoTime();
 		String[] candidates = StringUtils.toStringArray(configurations);
@@ -471,39 +416,21 @@ public class RedisProperties {
 
 ```
 
-
-
 - `getAutoConfigurationImportFilters()` 从`spring.factories` 获取 `AutoConfigurationImportFilter`的接口
 
-
-
-![image-20200323081903145](../../../images/SpringBoot/image-20200323081903145.png)
-
-
+![image-20200323081903145](../../images/SpringBoot/image-20200323081903145.png)
 
 - 循环内执行`Aware`系列接口
-
-
 
 `match`方法: `org.springframework.boot.autoconfigure.AutoConfigurationImportFilter#match`
 
 - `filter.match(candidates, autoConfigurationMetadata)` 比较判断哪些是需要自动注入的类
 
-
-
-
-
-![image-20200323082553595](../../../images/SpringBoot/image-20200323082553595.png)
-
-
-
-
-
-
+![image-20200323082553595](../../images/SpringBoot/image-20200323082553595.png)
 
 ### fireAutoConfigurationImportEvents
 
-```JAVA
+```java
 	private void fireAutoConfigurationImportEvents(List<String> configurations, Set<String> exclusions) {
 		// 获取自动配置的监听器列表
 		List<AutoConfigurationImportListener> listeners = getAutoConfigurationImportListeners();
@@ -521,17 +448,15 @@ public class RedisProperties {
 
 ```
 
-![image-20200323083149737](../../../images/SpringBoot/image-20200323083149737.png)
-
-
+![image-20200323083149737](../../images/SpringBoot/image-20200323083149737.png)
 
 - `AutoConfigurationImportEvent event = new AutoConfigurationImportEvent(this, configurations, exclusions);`
 
-![image-20200323083247061](../../../images/SpringBoot/image-20200323083247061.png)
+![image-20200323083247061](../../images/SpringBoot/image-20200323083247061.png)
 
 - `org.springframework.boot.autoconfigure.AutoConfigurationImportListener#onAutoConfigurationImportEvent` 在执行自动配置时触发 , 实现类只有 **`ConditionEvaluationReportAutoConfigurationImportListener`**
 
-  ```JAVA
+  ```java
   	@Override
   	public void onAutoConfigurationImportEvent(AutoConfigurationImportEvent event) {
   		if (this.beanFactory != null) {
@@ -542,34 +467,22 @@ public class RedisProperties {
   			report.recordExclusions(event.getExclusions());
   		}
   	}
-  
+
   ```
 
-  
-
-![image-20200323083656670](../../../images/SpringBoot/image-20200323083656670.png)
-
-
-
-
+![image-20200323083656670](../../images/SpringBoot/image-20200323083656670.png)
 
 - 初始化完
-
-
-
-
 
 ## process
 
 - `org.springframework.boot.autoconfigure.AutoConfigurationImportSelector.AutoConfigurationGroup#process`
 
-
-
-![image-20200323084922159](../../../images/SpringBoot/image-20200323084922159.png)
+![image-20200323084922159](../../images/SpringBoot/image-20200323084922159.png)
 
 - 后续的一些行为相对简单，直接放个源码了.
 
-```JAVA
+```java
 @Override
 		public void process(AnnotationMetadata annotationMetadata, DeferredImportSelector deferredImportSelector) {
 			Assert.state(deferredImportSelector instanceof AutoConfigurationImportSelector,
@@ -589,12 +502,6 @@ public class RedisProperties {
 			}
 		}
 ```
-
-
-
-
-
-
 
 ## selectImports
 
@@ -624,8 +531,4 @@ public class RedisProperties {
 
 ```
 
-
-
-
-
-后续由spring进行不再继续跟踪
+后续由 spring 进行不再继续跟踪
